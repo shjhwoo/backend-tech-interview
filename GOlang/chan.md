@@ -71,4 +71,33 @@ for value := range ch {
 
 ```
 
-<잘 안되었던 부분3>
+<내가 놓치고 있던 부분>
+채널 사이즈는 크게 할 필요가 없었어:: 만들어지는 고루틴의 개수가 더 크고 그만큼 순회하면서 채널에서 데잍터를 계속 빼 가고 있으니깐. 굳이 채널 사이즈를 accounts 수만큼 만들어줄 필욘없었다!
+```
+func (b *BoardLoadHandler) accountsToGetBoard(accounts []storage.Account) (int, int) {
+
+	trackerChannel := make(chan bool, 5)
+
+	orgId := b.Env.ORGID_1
+	for _, account := range accounts {
+		if len(accounts) == 0 {
+			continue
+		}
+		go b.getBoard(orgId, account, trackerChannel)
+	}
+
+	var getSuccess int
+	var getFailed int
+	for i := 0; i < len(accounts); i++ {
+		if <-trackerChannel {
+			getSuccess++
+		} else {
+			getFailed++
+		}
+	}
+
+	close(trackerChannel)
+
+	return getSuccess, getFailed
+}
+```
