@@ -3,7 +3,7 @@ package main
 import "fmt"
 
 type INode interface {
-	Print() string
+	Print(string)
 	Clone() INode
 }
 
@@ -12,13 +12,24 @@ type Folder struct {
 	Children []INode
 }
 
-func (fo *Folder) Print() string {
-	return fo.Name
+func (fo *Folder) Print(indent string) {
+	fmt.Println(indent, fo.Name)
+	for _, ch := range fo.Children {
+		ch.Print(indent + indent)
+	}
 }
 
 func (fo *Folder) Clone() INode {
 	newFolder := fo
 	newFolder.Name = fo.Name + "_clone"
+
+	var tempChildren []INode
+	for _, i := range fo.Children {
+		copy := i.Clone()
+		tempChildren = append(tempChildren, copy)
+	}
+	newFolder.Children = tempChildren
+
 	return newFolder
 }
 
@@ -26,8 +37,8 @@ type File struct {
 	Name string
 }
 
-func (fo *File) Print() string {
-	return fo.Name
+func (fo *File) Print(indent string) {
+	fmt.Println(indent, fo.Name)
 }
 
 func (fi *File) Clone() INode {
@@ -50,8 +61,11 @@ func main() {
 		Children: []INode{folder1, file2, file3},
 		Name:     "Folder2",
 	}
+	fmt.Println("\nPrinting hierarchy for Folder2")
+	folder2.Print("  ")
 
-	clonedFolder := folder2.Clone()
+	cloneFolder := folder2.Clone()
+	fmt.Println("\nPrinting hierarchy for clone Folder")
+	cloneFolder.Print("  ")
 
-	fmt.Println(folder1, folder2, clonedFolder, "@@")
 }
